@@ -45,6 +45,12 @@ namespace ToogleApi.Controllers
             return _dataAccessProvider.GetFlagByIdSingleRecord(id);
         }
 
+        [HttpGet("/key/{key}")]
+        public FeatureFlag GetByKey(string key)
+        {
+            return _dataAccessProvider.GetFlagByKeySingleRecord(key);
+        }
+
         [HttpPut]
         public IActionResult Edit([FromBody] FeatureFlag featureFlag)
         {

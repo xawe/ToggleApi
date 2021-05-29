@@ -13,5 +13,7 @@ namespace ToogleApi.DataAccess
         void DeleteFlagRecord(string id);
         FeatureFlag GetFlagByIdSingleRecord(string id);
         List<FeatureFlag> GetFlagsRecords();
+
+        FeatureFlag GetFlagByKeySingleRecord(string key);
     }
 }

@@ -14,6 +14,12 @@ namespace ToogleApi.DataAccess
         {            
             _context = context;
         }
+
+        public FeatureFlag GetFlagByKeySingleRecord(string key)
+        {
+            return _context.FeatureFlag.FirstOrDefault(t => t.Flag.ToLower() == key.ToLower());
+        }
+
         void IDataAccessProvider.AddFlagRecord(FeatureFlag flag)
         {
             _context.FeatureFlag.Add(flag);
