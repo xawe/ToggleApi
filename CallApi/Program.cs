@@ -10,45 +10,52 @@ using System.Collections.Generic;
 namespace CallApi
 {
     class Program
-    {
-        static HttpClient client = new HttpClient();
+    {        
         static void Main(string[] args)
         {
             var qtd = Convert.ToInt32(Console.ReadLine());
 
             RunAsync(qtd).GetAwaiter().GetResult();
 
+            Console.WriteLine("Processo Finalizado");
+            Console.ReadLine();
+
         }
 
         static async Task RunAsync(int n)
-        {            
-            client.BaseAddress = new Uri("http://localhost:5000/");
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
-
+        {           
             try
             {
-
-                var r = await GetFeatureToggleAsync("api/FeatureToogle/4ba9a9c4-e1be-4db6-b2a3-ae0f0d2c52ef");
-
-                List<FeatureFlag> flags = new List<FeatureFlag>();
-                for (int i = 0; i < n; i++)
+                using (var httpClientHandler = new HttpClientHandler())
                 {
-                    var id = Guid.NewGuid().ToString();
-                    flags.Add(new FeatureFlag
+                    httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; };
+                    using (var client = new HttpClient(httpClientHandler))
                     {
-                        CreatedOn = DateTime.Now,
-                        Description = "...",
-                        Flag = "Flag." + i.ToString(),
-                        Id = id,
-                        Value = "S"
-                    });
+                        client.BaseAddress = new Uri("http://localhost:5000/");
+                        client.DefaultRequestHeaders.Accept.Clear();
+                        client.DefaultRequestHeaders.Accept.Add(
+                            new MediaTypeWithQualityHeaderValue("application/json"));
+                        
+                        List<FeatureFlag> flags = new List<FeatureFlag>();
+                        for (int i = 0; i < n; i++)
+                        {
+                            var id = Guid.NewGuid().ToString();
+                            flags.Add(new FeatureFlag
+                            {
+                                CreatedOn = DateTime.Now,
+                                Description = "...",
+                                Flag = "Flag." + i.ToString(),
+                                Id = id,
+                                Value = "S"
+                            });
+                        }
+
+                        foreach (var f in flags)
+                        {
+                            await CreateFeatureToogle(f, client);
+                        }
+                    }
                 }
-
-
-                flags.ForEach( async f  =>  await CreateFeatureToogle(f));
-
             }
             catch (Exception ex)
             {
@@ -57,17 +64,8 @@ namespace CallApi
             }
         }
 
-        static async Task<FeatureFlag> GetFeatureToggleAsync(string path)
-        {
-            FeatureFlag ff = null;
-            HttpResponseMessage response = await client.GetAsync(path);
-            if (response.IsSuccessStatusCode)
-            {
-                ff = await response.Content.ReadAsAsync<FeatureFlag>();
-            }
-            return ff;
-        }
-        static async Task<Uri> CreateFeatureToogle(FeatureFlag flag)
+        
+        static async Task<Uri> CreateFeatureToogle(FeatureFlag flag, HttpClient client)
         {
             try
             {
@@ -83,9 +81,7 @@ namespace CallApi
             {
                 var x = ex;
                 throw;
-            }
-            
+            }            
         }
-
     }
 }
