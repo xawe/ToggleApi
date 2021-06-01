@@ -14,5 +14,7 @@ namespace ToogleApi.Models
         public string Value { get; set; }
         public DateTime CreatedOn { get; set; }
 
+        public string Grupo { get; set; }
+
     }
 }
